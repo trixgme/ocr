@@ -11,7 +11,18 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-# Check if setup was run
+# If running on Railway/Linux (not macOS), run uvicorn directly
+if [[ "$OSTYPE" != "darwin"* ]]; then
+    echo "Running in production mode (Linux)..."
+    if [ -d "backend/app" ]; then
+        cd backend
+    fi
+    pip install -r requirements.txt 2>/dev/null || true
+    exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+    exit 0
+fi
+
+# Check if setup was run (for local macOS development)
 if [ ! -d "backend/venv" ]; then
     echo -e "${YELLOW}Setup not complete. Running setup first...${NC}"
     ./setup.sh
